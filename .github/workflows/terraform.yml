@@ -1,0 +1,46 @@
+name: "Terraform"
+
+on: [push, pull_request]
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    terraform:
+        name: "Terraform"
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v2
+
+          - name: Setup Terraform
+            uses: hashicorp/setup-terraform@v1
+
+          - name: Terraform Format
+            id: fmt
+            run: terraform fmt -check
+
+          - name: Terraform Init
+            id: init
+            run: terraform init
+
+    checkov-job:
+        runs-on: ubuntu-latest
+        name: checkov-action
+        steps:
+          - name: Checkout repo
+            uses: actions/checkout@master
+
+          - name: Run Checkov action
+            id: checkov
+            uses: bridgecrewio/checkov-action@master
+            with:
+              directory: ./
+              quiet: true 
+              soft_fail: true 
+              framework: terraform 
+              output_format: json 
+              download_external_modules: true 
